@@ -27,7 +27,7 @@ def load_config_file(base_config: dict[str, Any]) -> configparser.ConfigParser:
         The ConfigParser object, in case you want to use it for saving config.
     """
     parser = configparser.ConfigParser()
-    parser.read(_CONFIG_FILE)
+    parser.read(_CONFIG_FILE, encoding="UTF-8")
     if "logging" in parser:
         logging_config = parser["logging"]
         base_config["console_log_level"] = int(
