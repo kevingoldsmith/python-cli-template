@@ -1,19 +1,24 @@
-init:
-	python -m venv venv
-	source venv/bin/activate; pip install -r requirements.txt
+.PHONY: install lint format typecheck test all clean list
 
-lint: ; @for py in *.py; do echo "Linting $$py"; pylint -rn $$py; done
+install:
+	uv sync --group dev
 
-black:
-	black .
+lint:
+	uv run ruff check .
 
-mypy:
-	mypy --disallow-untyped-defs .
+format:
+	uv run ruff format .
+
+typecheck:
+	uv run mypy .
+
+test:
+	uv run pytest
+
+all: format lint typecheck test
+
+clean:
+	rm -rf .venv __pycache__ .pytest_cache htmlcov .coverage .mypy_cache .ruff_cache
 
 list:
 	@grep '^[^#[:space:]].*:' Makefile
-
-test:
-	pytest
-
-all: test black lint mypy
