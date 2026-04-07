@@ -137,6 +137,11 @@ class TestInitializeLogging:
         stream_handlers = [h for h in template._logger.handlers if type(h) is logging.StreamHandler]
         assert stream_handlers[0].level == logging.WARNING
 
+    def test_idempotent_repeated_calls(self) -> None:
+        initialize_logging(None, logging.INFO, logging.DEBUG)
+        initialize_logging(None, logging.INFO, logging.DEBUG)
+        assert len(template._logger.handlers) == 1
+
 
 # ---------------------------------------------------------------------------
 # parse_args

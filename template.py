@@ -62,12 +62,18 @@ def initialize_logging(
 ) -> None:
     """Initialize logging settings.
 
+    Calling this more than once replaces existing handlers, preventing duplicate
+    log lines if cli() is invoked multiple times in the same process.
+
     Args:
         logfile_name: file name to save the log to; pass None to skip file logging.
             For production services consider structlog for structured/JSON logging.
         console_log_level: logging level for console output.
         logfile_log_level: logging level for file output.
     """
+    for handler in _logger.handlers:
+        handler.close()
+    _logger.handlers.clear()
     _logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter("%(name)s - %(asctime)s (%(levelname)s): %(message)s")
     formatter.datefmt = "%Y-%m-%d %H:%M:%S %z"
