@@ -20,6 +20,10 @@ docs/_build/
 
 # Environments
 venv/
+.venv/
+
+# ruff
+.ruff_cache/
 
 # mkdocs documentation
 /site

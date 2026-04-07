@@ -1,11 +1,9 @@
-"""A starting point for a new module or command
-"""
+"""A starting point for a new module or command"""
 
 import argparse
 import configparser
 import logging
-from typing import Dict, Any
-
+from typing import Any
 
 # some ideas for the future:
 #   added config param to append a date to the logfile name
@@ -15,33 +13,28 @@ _LOG_FILE = "template.log"  # replace with actual module name
 _CONSOLE_LEVEL = logging.INFO
 _FILE_LEVEL = logging.INFO
 
-_logger = logging.getLogger(__name__)  # pylint: disable=C0103
+_logger = logging.getLogger(__name__)
 
 
-def load_config_file(base_config: dict) -> configparser.ConfigParser:
-    """Load the configuration file and initialize any variables
+def load_config_file(base_config: dict[str, Any]) -> configparser.ConfigParser:
+    """Load the configuration file and initialize any variables.
 
     Args:
-        base_config (dict): the default configuration values
+        base_config: the default configuration values, mutated in place with
+            values from the config file.
 
     Returns:
-        configparser.ConfigParser: the config_parser object in case you want to
-        use it for saving the configuration
+        The ConfigParser object, in case you want to use it for saving config.
     """
     parser = configparser.ConfigParser()
     parser.read(_CONFIG_FILE)
-    # set variables from config
     if "logging" in parser:
         logging_config = parser["logging"]
         base_config["console_log_level"] = int(
-            logging_config.get(
-                "console_log_level", str(base_config["console_log_level"])
-            )
+            logging_config.get("console_log_level", str(base_config["console_log_level"]))
         )
         base_config["logfile_log_level"] = int(
-            logging_config.get(
-                "logfile_log_level", str(base_config["logfile_log_level"])
-            )
+            logging_config.get("logfile_log_level", str(base_config["logfile_log_level"]))
         )
         base_config["logfile_name"] = logging_config.get(
             "logfile_name", base_config["logfile_name"]
@@ -50,31 +43,30 @@ def load_config_file(base_config: dict) -> configparser.ConfigParser:
 
 
 def update_config_file(parser: configparser.ConfigParser) -> None:
-    """Save the configuration file. A later version of this should take in any
-    non global variables as a parameter
+    """Save the configuration file.
 
     Args:
-        parser (configparser.ConfigParser): the config parser object
+        parser: the ConfigParser object returned by load_config_file.
 
     Raises:
-        ValueError: if the parser is None
+        ValueError: if parser is None.
     """
-    if not parser:
+    if parser is None:
         raise ValueError("update_config_file called before load_config_file")
-    # config_parser['Login Parameters']['refresh_token'] = token_dict['refresh_token']
     with open(_CONFIG_FILE, "w", encoding="UTF-8") as configfile:
         parser.write(configfile)
 
 
 def initialize_logging(
-    logfile_name: str, console_log_level: int, logfile_log_level: int
+    logfile_name: str | None, console_log_level: int, logfile_log_level: int
 ) -> None:
-    """Initialize logging settings
+    """Initialize logging settings.
 
     Args:
-        logfile_name (str): the file name to save the file log to, use None to not save a log file
-        console_log_level (int): the logging level for console log messages
-        logfile_log_level (int): the logging level for file log messages
+        logfile_name: file name to save the log to; pass None to skip file logging.
+            For production services consider structlog for structured/JSON logging.
+        console_log_level: logging level for console output.
+        logfile_log_level: logging level for file output.
     """
     _logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter("%(name)s - %(asctime)s (%(levelname)s): %(message)s")
@@ -90,14 +82,29 @@ def initialize_logging(
         _logger.addHandler(file_handler)
 
 
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    """Parse command-line arguments.
+
+    Args:
+        argv: argument list; defaults to sys.argv. Pass an explicit list for testing.
+
+    Returns:
+        Namespace with parsed arguments.
+    """
+    arg_parser = argparse.ArgumentParser(description="do something interesting.")
+    arg_parser.add_argument("--verbose", "-v", action="store_true", dest="verbose")
+    arg_parser.add_argument("--verbose_log", "-V", action="store_true", dest="verbose_log")
+    return arg_parser.parse_args(argv)
+
+
 def main() -> None:
-    """put the business logic here when run from the command line"""
-    pass  # pylint: disable=W0107
+    """Put the business logic here when run from the command line."""
+    pass
 
 
 # when run as a script, do initialization
 if __name__ == "__main__":
-    config: Dict[str, Any] = {
+    config: dict[str, Any] = {
         "logfile_name": _LOG_FILE,
         "console_log_level": _CONSOLE_LEVEL,
         "logfile_log_level": _FILE_LEVEL,
@@ -105,12 +112,7 @@ if __name__ == "__main__":
     config_parser = load_config_file(config)
 
     # command-line arguments override config file settings
-    arg_parser = argparse.ArgumentParser(description="do something interesting.")
-    arg_parser.add_argument("--verbose", "-v", action="store_true", dest="verbose")
-    arg_parser.add_argument(
-        "--verbose_log", "-V", action="store_true", dest="verbose_log"
-    )
-    ns = arg_parser.parse_args()
+    ns = parse_args()
     if ns.verbose:
         config["console_log_level"] = logging.DEBUG
     if ns.verbose_log:
