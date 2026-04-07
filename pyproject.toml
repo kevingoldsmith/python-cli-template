@@ -7,7 +7,7 @@ requires-python = ">=3.12"
 dependencies = []
 
 [project.scripts]
-template = "template:main"
+template = "template:cli"
 
 [dependency-groups]
 dev = [

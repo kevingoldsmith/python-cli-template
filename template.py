@@ -102,14 +102,17 @@ def main() -> None:
     pass
 
 
-# when run as a script, do initialization
-if __name__ == "__main__":
+def cli() -> None:
+    """Entry point for the installed console script.
+
+    Loads config, parses CLI arguments, initializes logging, then calls main().
+    """
     config: dict[str, Any] = {
         "logfile_name": _LOG_FILE,
         "console_log_level": _CONSOLE_LEVEL,
         "logfile_log_level": _FILE_LEVEL,
     }
-    config_parser = load_config_file(config)
+    load_config_file(config)
 
     # command-line arguments override config file settings
     ns = parse_args()
@@ -122,3 +125,7 @@ if __name__ == "__main__":
         config["logfile_name"], config["console_log_level"], config["logfile_log_level"]
     )
     main()
+
+
+if __name__ == "__main__":
+    cli()

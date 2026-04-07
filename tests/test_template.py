@@ -1,3 +1,4 @@
+import argparse
 import configparser
 import logging
 from collections.abc import Generator
@@ -8,6 +9,7 @@ from pytest_mock import MockerFixture
 
 import template
 from template import (
+    cli,
     initialize_logging,
     load_config_file,
     main,
@@ -179,3 +181,38 @@ class TestParseArgs:
 class TestMain:
     def test_main_runs_without_error(self) -> None:
         main()  # should not raise
+
+
+# ---------------------------------------------------------------------------
+# cli
+# ---------------------------------------------------------------------------
+
+
+class TestCli:
+    def test_cli_runs_without_error(self, mocker: MockerFixture) -> None:
+        mocker.patch(
+            "template.parse_args",
+            return_value=argparse.Namespace(verbose=False, verbose_log=False),
+        )
+        mocker.patch("template.initialize_logging")
+        cli()  # should not raise
+
+    def test_cli_sets_verbose_console(self, mocker: MockerFixture) -> None:
+        mocker.patch(
+            "template.parse_args",
+            return_value=argparse.Namespace(verbose=True, verbose_log=False),
+        )
+        mock_init = mocker.patch("template.initialize_logging")
+        cli()
+        args, _ = mock_init.call_args
+        assert args[1] == logging.DEBUG  # console_log_level
+
+    def test_cli_sets_verbose_log(self, mocker: MockerFixture) -> None:
+        mocker.patch(
+            "template.parse_args",
+            return_value=argparse.Namespace(verbose=False, verbose_log=True),
+        )
+        mock_init = mocker.patch("template.initialize_logging")
+        cli()
+        args, _ = mock_init.call_args
+        assert args[2] == logging.DEBUG  # logfile_log_level
