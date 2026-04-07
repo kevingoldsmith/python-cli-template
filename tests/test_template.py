@@ -90,7 +90,7 @@ class TestLoadConfigFile:
 class TestUpdateConfigFile:
     def test_raises_on_none_parser(self) -> None:
         with pytest.raises(ValueError, match="update_config_file called before load_config_file"):
-            update_config_file(None)  # type: ignore[arg-type]
+            update_config_file(None)
 
     def test_writes_file(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.chdir(tmp_path)

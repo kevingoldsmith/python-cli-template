@@ -42,7 +42,7 @@ def load_config_file(base_config: dict[str, Any]) -> configparser.ConfigParser:
     return parser
 
 
-def update_config_file(parser: configparser.ConfigParser) -> None:
+def update_config_file(parser: configparser.ConfigParser | None) -> None:
     """Save the configuration file.
 
     Args:
